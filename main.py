@@ -7,7 +7,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Packet sniffer')
 parser.add_argument('--ip', help="IP address", required=True)
-parser.add_argument('--protocol', help="Protocol (TCP/ICMP)", required=True)
+parser.add_argument('--protocol', help="Protocol (TCP/ICMP/UDP)", required=True)
 parser.add_argument('--data', help="Display the packet data", action='store_true')
 
 options = parser.parse_args()
@@ -62,6 +62,8 @@ class Packet:
 def sniff(host):
     if options.protocol == 'tcp':
         socket_protocol = socket.IPPROTO_TCP
+    elif options.protocol == 'udp':
+        socket_protocol = socket.IPPROTO_UDP
     else:
         socket_protocol = socket.IPPROTO_ICMP
     sniffer_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket_protocol)
