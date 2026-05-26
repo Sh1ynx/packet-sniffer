@@ -23,8 +23,12 @@ class Packet:
         self.time_to_live = header[5]
         self.bit_protocol = header[6]
         self.checksum = header[7]
-        self.source_ip = header[8]
-        self.dest_ip = header[9]
+        self.source = header[8]
+        self.dest = header[9]
+
+
+        self.source_ip = ipaddress.ip_address(self.source)
+        self.dest_ip = ipaddress.ip_address(self.dest)
 
         self.protocols = {
             1: "ICMP",
@@ -38,11 +42,25 @@ class Packet:
             print(f"{e} Protocol doesn't exist or not supported")
             self.protocol = str(self.bit_protocol)
 
+    def show_some_header_data(self):
+        print(f"{self.protocols[self.bit_protocol]} {self.source_ip} -> {self.dest_ip}")
 
-def sniff():
-    pass
+def sniff(host):
+    socket_protocol = socket.IPPROTO_ICMP
+    sniffer_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket_protocol)
+    sniffer_socket.bind((host,0))
+    sniffer_socket.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL,1)
+
+    try:
+        while True:
+            raw_data = sniffer_socket.recv(65535)
+            packet = Packet(raw_data)
+            packet.show_some_header_data()
+    except KeyboardInterrupt:
+        sys.exit(1)
+
 
 if __name__ == "__main__":
-    sniff()
+    sniff(options.ip)
 
 
