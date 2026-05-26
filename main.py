@@ -6,7 +6,10 @@ import argparse
 
 
 parser = argparse.ArgumentParser(description='Packet sniffer')
-parser.add_argument('--ip', help="Ip address", required=True)
+parser.add_argument('--ip', help="IP address", required=True)
+parser.add_argument('--protocol', help="Protocol (TCP/ICMP)", required=True)
+parser.add_argument('--data', help="Display the packet data", action='store_true')
+
 options = parser.parse_args()
 
 
@@ -45,8 +48,22 @@ class Packet:
     def show_some_header_data(self):
         print(f"{self.protocols[self.bit_protocol]} {self.source_ip} -> {self.dest_ip}")
 
+    def print_data(self):
+        data = self.packet[20:]
+        print("-" * 15 ,"START OF DATA", "-"*15)
+        for d in data:
+            if (d < 128):
+                print(chr(d), end='')
+            else:
+                print(".", end='')
+        print("\n","-" * 15 ,"END OF DATA", "-"*15)
+
+
 def sniff(host):
-    socket_protocol = socket.IPPROTO_ICMP
+    if options.protocol == 'tcp':
+        socket_protocol = socket.IPPROTO_TCP
+    else:
+        socket_protocol = socket.IPPROTO_ICMP
     sniffer_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket_protocol)
     sniffer_socket.bind((host,0))
     sniffer_socket.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL,1)
@@ -56,6 +73,8 @@ def sniff(host):
             raw_data = sniffer_socket.recv(65535)
             packet = Packet(raw_data)
             packet.show_some_header_data()
+            if options.data:
+                packet.print_data()
     except KeyboardInterrupt:
         sys.exit(1)
 
