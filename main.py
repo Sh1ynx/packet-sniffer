@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(description='Packet sniffer')
 parser.add_argument('--ip', help="IP address", required=True)
 parser.add_argument('--protocol', help="Protocol (TCP/ICMP/UDP)", required=True)
 parser.add_argument('--data', help="Display the packet data", action='store_true')
+parser.add_argument('--exclude', help="Exclude an ip from sniffing")
 
 options = parser.parse_args()
 
@@ -74,6 +75,9 @@ def sniff(host):
         while True:
             raw_data = sniffer_socket.recv(65535)
             packet = Packet(raw_data)
+            if options.exclude:
+                if str(packet.source_ip) == options.exclude:
+                    continue
             packet.show_some_header_data()
             if options.data:
                 packet.print_data()
