@@ -1,4 +1,4 @@
-# Packet Sniffer
+# Sniffit
  
 A Python raw socket packet sniffer that captures IPv4 packets from a network interface.
 
